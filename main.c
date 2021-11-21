@@ -8,6 +8,25 @@
 /* il faut pas oublié de faire une copie de la première valeur pour pouvoir reparcourire la liste */
 
 
+//fonction qui ajoute un item dans la map à une posistion aléatoire
+void putObjectToMap(int object, int** map){
+    int x,y;
+    do {
+        x = rand()%(9);
+        y = rand()%(9);
+    } while(map[x][y] != 0);
+    map[x][y] = object;
+
+}
+void addPlayerOnTheMap(int** map, int* x, int* y){
+    do {
+        *x = rand()%(10-1);
+        *y = rand()%(10-1);
+    } while(map[*x][*y] != 0);
+    map[*x][*y] = 1;
+}
+
+//fonction qui permet de créer une map
 int** getMap() {
     int** array = malloc(sizeof (int*) * 10);
     for (int i = 0; i < 10; ++i) {
@@ -29,10 +48,16 @@ void displayMatrix(int **tab, int rows, int columns) {
 
 
     }
-}
+}//fonction qui fais passer un tour de jeu
 void newTour(int** array, char dir, int* y, int* x) {
     if(dir == 'z') {
         if(*y-1 > -1) {
+            if(array[*y][*x + 1] != 0) {
+                int value = array[*y][*x + 1];
+                if(value >= 3 && value <=11) {
+
+                }
+            }
             array[*y][*x] = 0;
             array[*y - 1][*x] = 1;
             *y -= 1;
@@ -40,6 +65,12 @@ void newTour(int** array, char dir, int* y, int* x) {
     }
     else if(dir == 'q') {
         if(*x-1 > -1) {
+            if(array[*y][*x + 1] != 0) {
+                int value = array[*y][*x + 1];
+                if(value >= 3 && value <=11) {
+
+                }
+            }
             array[*y][*x] = 0;
             array[*y][*x - 1] = 1;
             *x -= 1;
@@ -47,6 +78,12 @@ void newTour(int** array, char dir, int* y, int* x) {
     }
     else if(dir == 's') {
         if(*y+1 < 10) {
+            if(array[*y][*x + 1] != 0) {
+                int value = array[*y][*x + 1];
+                if(value >= 3 && value <=11) {
+
+                }
+            }
             array[*y][*x] = 0;
             array[*y + 1][*x] = 1;
             *y += 1;
@@ -54,8 +91,15 @@ void newTour(int** array, char dir, int* y, int* x) {
     }
     else if(dir == 'd') {
         if(*x+1 < 10) {
+            if(array[*y][*x + 1] != 0) {
+                int value = array[*y][*x + 1];
+                if(value >= 3 && value <=11) {
+
+                }
+            }
             array[*y][*x] = 0;
             array[*y][*x + 1] = 1;
+
             *x += 1;
         }
     }
@@ -139,12 +183,12 @@ void displayInventory(itemInventaire *inventory) {
 
 int main() {
 
-    enum ItemMap d = Joueur;
+    //enum ObjectMap d = Joueur;
 
 
     player* p = malloc(sizeof (player));
-    p->y = 2;
-    p->x = 3;
+//    p->y ;
+//    p->x = ;
 
 
     /*
@@ -172,7 +216,10 @@ int main() {
      */
 
     int** array = getMap();
-    array[p->y][p->x] = 1;
+
+    putObjectToMap(3, array);
+    addPlayerOnTheMap(array, &(p->y), &(p->x));
+
     displayMatrix(array, 10,10);
     char c = 'e';
     while (c != 'a') {
@@ -183,6 +230,7 @@ int main() {
             if(c == 'e') {
                 displayInventory(p->inventaire);
             }
+            printf("location: y: %d x: %d", (p->y), (p->x));
             newTour(array, c, &(p->y), &(p->x));
             printf("----------------------------------\n");
             displayMatrix(array, 10, 10);
