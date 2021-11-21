@@ -53,7 +53,7 @@ void newTour(int** array, char dir, int* y, int* x) {
     if(dir == 'z') {
         if(*y-1 > -1) {
             if(array[*y][*x + 1] != 0) {
-                int value = array[*y][*x + 1];
+                int value = array[*y - 1][*x];
                 if(value >= 3 && value <=11) {
 
                 }
@@ -66,7 +66,7 @@ void newTour(int** array, char dir, int* y, int* x) {
     else if(dir == 'q') {
         if(*x-1 > -1) {
             if(array[*y][*x + 1] != 0) {
-                int value = array[*y][*x + 1];
+                int value = array[*y][*x - 1];
                 if(value >= 3 && value <=11) {
 
                 }
@@ -79,7 +79,7 @@ void newTour(int** array, char dir, int* y, int* x) {
     else if(dir == 's') {
         if(*y+1 < 10) {
             if(array[*y][*x + 1] != 0) {
-                int value = array[*y][*x + 1];
+                int value = array[*y + 1][*x];
                 if(value >= 3 && value <=11) {
 
                 }
