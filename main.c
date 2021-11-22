@@ -5,10 +5,10 @@
 #include "src/itemMap.c"
 //les items utilisable dans l'inventaire
 
-/* il faut pas oublié de faire une copie de la première valeur pour pouvoir reparcourire la liste */
+/* il ne faut pas oublier de faire une copie de la première valeur pour pouvoir reparcourir la liste */
 
 
-//fonction qui ajoute un item dans la map à une posistion aléatoire
+//fonction qui ajoute un item dans la map à une position aléatoire
 void putObjectToMap(int object, int** map){
     int x,y;
     do {
@@ -48,11 +48,66 @@ void displayMatrix(int **tab, int rows, int columns) {
 
 
     }
-}//fonction qui fais passer un tour de jeu
+}
+
+
+
+//this function is used to display element near the player
+void displayMapNearPlayer(int** map, int x, int y){
+    int ZObject = map[y -1][x];
+    int QObject = map[y][x - 1];
+    int SObject = map[y + 1][x];
+    int DObject = map[y][x + 1];
+
+    enum ObjectMap itZ = ZObject;
+    enum ObjectMap itQ = QObject;
+    enum ObjectMap itS = SObject;
+    enum ObjectMap itD = DObject;
+
+    if (itZ >= -3 && itZ <= 99) {
+        printf("En Z se trouve : %d \n", itZ);
+    }
+    else {
+        printf("En Z le joueur est au bord");
+    }
+
+    if (itQ >= -3 && itQ <= 99){
+        printf("En Q se trouve : %d \n", itQ);
+    }
+    else{
+        printf("En Q le joueur est au bord");
+    }
+    if (itS >= -3 && itS <= 99){
+        printf("En S se trouve : %d \n", itS);
+    }
+    else{
+        printf("En S le joueur est au bord");
+    }
+    if (itD >= -3 && itD <= 99){
+        printf("En D se trouve : %d \n", itD);
+    }
+    else{
+        printf("En D le joueur est au bord");
+    }
+
+
+
+
+
+}
+
+
+typedef struct player player;
+
+//this function is used to display message box action
+void GetAction(player* p, int** map) {
+}
+
+//fonction qui fait passer un tour de jeu
 void newTour(int** array, char dir, int* y, int* x) {
     if(dir == 'z') {
-        if(*y-1 > -1) {
-            if(array[*y][*x + 1] != 0) {
+        if(*y-1 <= -1) {
+            if(array[*y - 1][*x] != 0) {
                 int value = array[*y - 1][*x];
                 if(value >= 3 && value <=11) {
 
@@ -65,7 +120,7 @@ void newTour(int** array, char dir, int* y, int* x) {
     }
     else if(dir == 'q') {
         if(*x-1 > -1) {
-            if(array[*y][*x + 1] != 0) {
+            if(array[*y][*x - 1] != 0) {
                 int value = array[*y][*x - 1];
                 if(value >= 3 && value <=11) {
 
@@ -223,7 +278,7 @@ int main() {
     displayMatrix(array, 10,10);
     char c = 'e';
     while (c != 'a') {
-
+        displayMapNearPlayer(array, p->x, p->y);
         printf("\n Commande: ");
         int res = scanf("%c", &c);
         if(res == 1) {

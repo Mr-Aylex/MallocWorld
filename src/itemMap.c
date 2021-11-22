@@ -20,8 +20,8 @@ enum ObjectMap {
     PlanteZ3,//9
     RocherZ3,//10
     BoisZ3,//11
-    Monstes,
-    BossDeFin
+    Monstes = 12,//12
+    BossDeFin = 99
 };
 
 enum ItemInventaire {
