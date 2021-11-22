@@ -29,9 +29,9 @@ enum ItemInventaire {
     Pioche,//2
     SerpeEnBois,//3
     HacheEnBois,//4
-    Sapin,//    5
-    Pierre,//    6
-    Herpe,//    7
+    Sapin,//5
+    Pierre,// 6
+    Herpe,// 7
     EpeeEnPierre,// 8
     LanceEnPierre,// 9
     MarteauEnPierre,

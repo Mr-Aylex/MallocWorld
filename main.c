@@ -1,11 +1,50 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "src/inventory.c"
 #include "src/map.c"
 #include "src/itemMap.c"
-//les items utilisable dans l'inventaire
 
-/* il ne faut pas oublier de faire une copie de la première valeur pour pouvoir reparcourir la liste */
+
+
+// structure d'un item de l'inventaire
+typedef struct item {
+    int idItem; //la valeur de l'objet Eppée en bois = 1 | pioche en bois = 2 ...
+    char nom[20]; // Epee, pioche , ...
+    char type; //il faut choisir arbitrairement une valeur pour chaque type a = Arme , o = Outil, r = Ressource, s = Soin
+    int nombre; //doit être inferieur ou egale à 20 pour les ressources et = à 1 ou à 0 pour les outils
+    int durabilite; //uniquement pour les outils / armes
+
+    int typeOutils; //1 = epee, 2 = pioche, 3 = hache, 4 Serpe
+    int materiaux; //enum bois = 1, pierre = 2, fer = 3, diamant = 4  ...
+} item;
+
+// structure ressource (plante, pierre, ...)  pouvant être placée sur la carte
+typedef struct ressourceInMap {
+    char nom[20];
+    int id;
+    int ressource;
+    int difficulte;
+} ressourceInMap;
+
+// fonction qui permet de créer une ressource
+ressourceInMap makeObectMap(enum ObjectMap id, char nom[20], int ressource, int difficulte) {
+    ressourceInMap obj;
+    obj.id = id;
+    obj.ressource = ressource;
+    obj.difficulte = difficulte;
+    return obj;
+}
+// fonction qui permet de créer un outil
+item makeOutils(enum ItemInventaire id, char nom[20], int type, int durabilite, int materiaux) {
+    item out;
+    strcpy(out.nom, nom);
+    out.idItem = id;
+    out.type = type;
+    out.durabilite = durabilite;
+    out.materiaux = materiaux;
+    return out;
+}
 
 
 //fonction qui ajoute un item dans la map à une position aléatoire
@@ -20,8 +59,8 @@ void putObjectToMap(int object, int** map){
 }
 void addPlayerOnTheMap(int** map, int* x, int* y){
     do {
-        *x = rand()%(10-1);
-        *y = rand()%(10-1);
+        *x = rand()%(9);
+        *y = rand()%(9);
     } while(map[*x][*y] != 0);
     map[*x][*y] = 1;
 }
@@ -100,11 +139,10 @@ void displayMapNearPlayer(int** map, int x, int y){
     }
 }
 
+typedef struct itemInventaire itemInventaire;
+//Fonction à terminer---------------------------------------------------------------------------------------------------------------------
+int checkIfPlayerCanCollect(itemInventaire* inventaire, int ressource) {
 
-typedef struct player player;
-
-//this function is used to display message box action
-void GetAction(player* p, int** map) {
 }
 
 //fonction qui fait passer un tour de jeu
@@ -165,15 +203,8 @@ void newTour(int** array, char dir, int* y, int* x) {
     }
 }
 
-typedef struct item {
-    int idItem; //la valeur de l'objet Eppée en bois = 1 | pioche en bois = 2 ...
-    char* nom; // Epee, pioche , ...
-    char type; //il faut choisir arbitrairement une valeur pour chaque type a = Arme , o = Outil, r = Ressource, s = Soin
-    int nombre; //dois être inferieur ou egual à 20 pour les ressources et = à 1 ou à 0 pour les outils
-    int durabilite; //uniquement pour les outils / armes
-} item;
 
-typedef struct itemInventaire itemInventaire;
+
 
 struct itemInventaire {
     //int id;
@@ -242,14 +273,10 @@ void displayInventory(itemInventaire *inventory) {
 
 
 int main() {
-
-    //enum ObjectMap d = Joueur;
-
+    enum ObjectMap BoisZ1 = BoisZ1;
+    ressourceInMap Sapin = makeObectMap(BoisZ1, "Sapin", 5, 1);
 
     player* p = malloc(sizeof (player));
-//    p->y ;
-//    p->x = ;
-
 
     /*
      * Start Test Creation item & deleteItem & updateItem
