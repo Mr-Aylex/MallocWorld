@@ -6,7 +6,6 @@
 #include "src/itemMap.c"
 
 
-
 // structure d'un item de l'inventaire
 typedef struct item {
     int idItem; //la valeur de l'objet Eppée en bois = 1 | pioche en bois = 2 ...
@@ -26,6 +25,27 @@ typedef struct ressourceInMap {
     int ressource;
     int difficulte;
 } ressourceInMap;
+
+
+typedef struct itemInventaire {
+    //int id;
+    item item;
+    struct itemInventaire* next;
+} itemInventaire;
+
+
+typedef struct player {
+    /* localisation sur la map */
+    int y;
+    int x;
+
+    int map; // id de la map ou le joueur est present
+    itemInventaire* inventaire; //maximum 20 items
+
+} player;
+
+
+
 
 // fonction qui permet de créer une ressource
 ressourceInMap makeObectMap(enum ObjectMap id, char nom[20], int ressource, int difficulte) {
@@ -139,10 +159,17 @@ void displayMapNearPlayer(int** map, int x, int y){
     }
 }
 
-typedef struct itemInventaire itemInventaire;
-//Fonction à terminer---------------------------------------------------------------------------------------------------------------------
-int checkIfPlayerCanCollect(itemInventaire* inventaire, int ressource) {
 
+
+int checkIfPlayerCanCollect(itemInventaire* inventaire, ressourceInMap ressource) {
+    itemInventaire* itemInventaire1 = inventaire;
+    while (itemInventaire1->next != NULL) {
+        if(itemInventaire1->item.typeOutils == ressource.ressource && itemInventaire1->item.materiaux >= ressource.difficulte) {
+            return 1;
+        }
+        inventaire = itemInventaire1->next;
+        return 0;
+    }
 }
 
 //fonction qui fait passer un tour de jeu
@@ -206,22 +233,6 @@ void newTour(int** array, char dir, int* y, int* x) {
 
 
 
-struct itemInventaire {
-    //int id;
-    item item;
-    itemInventaire* next;
-};
-
-
-typedef struct player {
-    /* localisation sur la map */
-    int y;
-    int x;
-
-    int map; // id de la map ou le joueur est present
-    itemInventaire* inventaire; //maximum 20 items
-
-} player;
 
 
 /* il faut pas oublié de faire une copie de la première valeur pour pouvoir reparcourire la liste */
