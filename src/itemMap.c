@@ -34,29 +34,29 @@ enum ItemInventaire {
     Herpe,// 7
     EpeeEnPierre,// 8
     LanceEnPierre,// 9
-    MarteauEnPierre,
-    PlastronEnPierre,
-    PiocheEnPierre,
-    SerpeEnPierre,
-    HacheEnPierre,
-    PotionDeVie1,
-    Hetre,
-    Fer,
-    Lavande,
-    EpeeEnFer,
-    LanceEnFer,
-    MarteauEnFer,
-    PlastronEnFer,
-    PiocheEnFer,
-    SerpeEnFer,
-    HacheEnFer,
-    PotionDeVie2,
-    Chene,
-    Diamant,
-    Chanvre,
-    EpeeEnDiamant,
-    LanceEnDiamant,
-    MarteauEnDiament,
-    PlastronEnDiament,
-    PotionDeVie3
+    MarteauEnPierre, // 10
+    PlastronEnPierre,// 11
+    PiocheEnPierre,// 12
+    SerpeEnPierre,// 13
+    HacheEnPierre,// 14
+    PotionDeVie1,// 15
+    Hetre,// 16
+    Fer,//17
+    Lavande, //18
+    EpeeEnFer,//19
+    LanceEnFer,//20
+    MarteauEnFer,//21
+    PlastronEnFer,//22
+    PiocheEnFer,//23
+    SerpeEnFer,//24
+    HacheEnFer, //25
+    PotionDeVie2, //26
+    Chene, //27
+    Diamant, //28
+    Chanvre, //29
+    EpeeEnDiamant, //30
+    LanceEnDiamant, //31
+    MarteauEnDiament, //32
+    PlastronEnDiament, //33
+    PotionDeVie3 //34
 };

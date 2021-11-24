@@ -187,9 +187,12 @@ void newTour(int** array, char dir, int* y, int* x, itemInventaire* inventaire) 
                     }
                 }
             }
-            array[*y][*x] = 0;
-            array[*y - 1][*x] = 1;
-            *y -= 1;
+            else {
+                array[*y][*x] = 0;
+                array[*y - 1][*x] = 1;
+                *y -= 1;
+            }
+
         }
     }
     else if(dir == 'q') {
@@ -294,7 +297,8 @@ void displayInventory(itemInventaire *inventory) {
 
 int main() {
 
-
+    ressourceInMap* tabRessource = malloc(sizeof(ressourceInMap) * 15);
+    tabRessource[0] = makeObectMap(3, "PlanteZ1", 18, 1);
     enum ObjectMap obm = BoisZ1;
     ressourceInMap Sapin = makeObectMap(obm, "Sapin", 5, 1);
 
@@ -343,11 +347,11 @@ int main() {
                 displayInventory(p->inventaire);
             }
             printf("location: y: %d x: %d", (p->y), (p->x));
-            newTour(array, c, &(p->y), &(p->x));
+            itemInventaire *inventaireCopy = p->inventaire;// étape nécessaire, il faut faire une copie du pointeur pour que lors de l'affichage,
+            newTour(array, c, &(p->y), &(p->x), inventaireCopy);
             printf("----------------------------------\n");
             displayMatrix(array, 10, 10);
             if(c == 'e') {
-                itemInventaire *inventaireCopy = p->inventaire;// étape nécessaire, il faut faire une copie du pointeur pour que lors de l'affichage,
                 // le pointeur initial reste à la première valeur.
                 displayInventory(inventaireCopy);
             }
