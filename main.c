@@ -5,7 +5,8 @@
 #include "src/map.c"
 #include "src/itemMap.c"
 
-
+typedef struct ressourceInMap ressourceInMap;
+int** getMap();
 // structure d'un item de l'inventaire
 typedef struct item {
     int idItem; //la valeur de l'objet Eppée en bois = 1 | pioche en bois = 2 ...
@@ -19,12 +20,6 @@ typedef struct item {
 } item;
 
 // structure ressource (plante, pierre, ...)  pouvant être placée sur la carte
-typedef struct ressourceInMap {
-    char* nom;
-    int id;
-    int ressource;
-    int difficulte;
-} ressourceInMap;
 
 
 typedef struct itemInventaire {
@@ -95,6 +90,7 @@ void addPlayerOnTheMap(int** map, int* x, int* y){
 }
 
 //fonction qui permet de créer une map
+/*
 int** getMap() {
     int** array = malloc(sizeof (int*) * 10);
     for (int i = 0; i < 10; ++i) {
@@ -106,7 +102,7 @@ int** getMap() {
     }
     return array;
 }
-
+*/
 void displayMatrix(int **tab, int rows, int columns) {
     for(int i = 0; i < rows; i++) {
         for (int j = 0; j<columns;j++) {
@@ -175,7 +171,7 @@ void displayMapNearPlayer(int** map, int x, int y){
 //fonction qui fait passer un tour de jeu
 void newTour(int** array, char dir, int* y, int* x, itemInventaire* inventaire) {
     printf(" \n direction : %c", dir);
-    ressourceInMap a = makeObectMap(2, RocherZ1, 6, 2);
+    ressourceInMap a = makeObectMap(2, "RocherZ1", 6, 2);
     if(dir == 'z') {
         if(*y - 1 > -1) {
             if(array[*y - 1][*x] != 0) {
@@ -283,7 +279,7 @@ void displayInventory(itemInventaire *inventory) {
     printf("<<-------------->>\n");
     printf("inventaire \n");
     while (inventory->next != NULL) {
-        printf(inventory->item.nom);
+        printf("%s",inventory->item.nom);
         printf(" ; durabilite : %d", inventory->item.durabilite);
         printf("\n");
 
