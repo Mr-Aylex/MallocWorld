@@ -20,7 +20,7 @@ typedef struct item {
 
 // structure ressource (plante, pierre, ...)  pouvant être placée sur la carte
 typedef struct ressourceInMap {
-    char nom[20];
+    char* nom;
     int id;
     int ressource;
     int difficulte;
@@ -32,6 +32,17 @@ typedef struct itemInventaire {
     item item;
     struct itemInventaire* next;
 } itemInventaire;
+
+int checkIfPlayerCanCollect(itemInventaire* inventaire, ressourceInMap ressource) {
+    itemInventaire* itemInventaire1 = inventaire;
+    while (itemInventaire1->next != NULL) {
+        if(itemInventaire1->item.typeOutils == ressource.ressource && itemInventaire1->item.materiaux >= ressource.difficulte) {
+            return 1;
+        }
+        inventaire = itemInventaire1->next;
+    }
+    return 0;
+}
 
 
 typedef struct player {
@@ -46,7 +57,7 @@ typedef struct player {
 
 
 // fonction qui permet de créer une ressource
-ressourceInMap makeObectMap(enum ObjectMap id, char nom[20], int ressource, int difficulte) {
+ressourceInMap makeObectMap(enum ObjectMap id, char* nom, int ressource, int difficulte) {
     ressourceInMap obj;
     obj.id = id;
     obj.ressource = ressource;
@@ -54,7 +65,7 @@ ressourceInMap makeObectMap(enum ObjectMap id, char nom[20], int ressource, int 
     return obj;
 }
 // fonction qui permet de créer un outil
-item makeOutils(enum ItemInventaire id, char nom[20], int type, int durabilite, int materiaux) {
+item makeOutils(enum ItemInventaire id, char* nom, int type, int durabilite, int materiaux) {
     item out;
     strcpy(out.nom, nom);
     out.idItem = id;
@@ -159,26 +170,21 @@ void displayMapNearPlayer(int** map, int x, int y){
 
 
 
-int checkIfPlayerCanCollect(itemInventaire* inventaire, ressourceInMap ressource) {
-    itemInventaire* itemInventaire1 = inventaire;
-    while (itemInventaire1->next != NULL) {
-        if(itemInventaire1->item.typeOutils == ressource.ressource && itemInventaire1->item.materiaux >= ressource.difficulte) {
-            return 1;
-        }
-        inventaire = itemInventaire1->next;
-        return 0;
-    }
-}
+
 
 //fonction qui fait passer un tour de jeu
-void newTour(int** array, char dir, int* y, int* x) {
+void newTour(int** array, char dir, int* y, int* x, itemInventaire* inventaire) {
     printf(" \n direction : %c", dir);
+    ressourceInMap a = makeObectMap(2, RocherZ1, 6, 2);
     if(dir == 'z') {
         if(*y - 1 > -1) {
             if(array[*y - 1][*x] != 0) {
                 int value = array[*y - 1][*x];
-                if(value >= 3 && value <=11) {
 
+                if(value >= 3 && value <=11) {
+                    if (checkIfPlayerCanCollect(inventaire, a)) {
+                        array[*y - 1][*x] = 0;
+                    }
                 }
             }
             array[*y][*x] = 0;
@@ -271,17 +277,24 @@ void updateItemInInventory(itemInventaire* inventaire, int id, item* item1) {
     }
 }
 void displayInventory(itemInventaire *inventory) {
+    printf("<<-------------->>\n");
     printf("inventaire \n");
     while (inventory->next != NULL) {
-        printf("type: %c \n", inventory->item.type);
-        printf("id: %d \n", inventory->item.idItem);
+        printf(inventory->item.nom);
+        printf(" ; durabilite : %d", inventory->item.durabilite);
+        printf("\n");
+
+        //printf("type: %c \n", inventory->item.type);
+        //printf("id: %d \n", inventory->item.idItem);
         inventory = inventory->next;
     }
-    printf("<<-------------->>");
+    printf("<<-------------->>\n");
 }
 
 
 int main() {
+
+
     enum ObjectMap obm = BoisZ1;
     ressourceInMap Sapin = makeObectMap(obm, "Sapin", 5, 1);
 
@@ -291,11 +304,13 @@ int main() {
      * Start Test Creation item & deleteItem & updateItem
      */
     item* testItem = malloc(sizeof (item));
-    testItem->idItem = 3;
-    testItem->nom = "Pioche";
+    testItem->idItem = 2;
+    testItem->nom = "Pioche en Bois";
+    testItem->typeOutils = 2;
     testItem->durabilite = 5;
-    testItem->nombre = 0;
+    testItem->nombre = 1;
     testItem->type = 'o';
+    testItem->materiaux = 1;
     itemInventaire inventaire2 = makeItemInventaire(*testItem);
 
     itemInventaire inventaire = makeItemInventaire(*testItem);
@@ -313,7 +328,7 @@ int main() {
 
     int** array = getMap();
 
-    putObjectToMap(3, array);
+    putObjectToMap(4, array);
     addPlayerOnTheMap(array, &(p->y), &(p->x));
 
     displayMatrix(array, 10,10);
