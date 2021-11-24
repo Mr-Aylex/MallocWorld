@@ -9,7 +9,7 @@
 // structure d'un item de l'inventaire
 typedef struct item {
     int idItem; //la valeur de l'objet Eppée en bois = 1 | pioche en bois = 2 ...
-    char nom[20]; // Epee, pioche , ...
+    char* nom; // Epee, pioche , ...
     char type; //il faut choisir arbitrairement une valeur pour chaque type a = Arme , o = Outil, r = Ressource, s = Soin
     int nombre; //doit être inferieur ou egale à 20 pour les ressources et = à 1 ou à 0 pour les outils
     int durabilite; //uniquement pour les outils / armes
@@ -43,8 +43,6 @@ typedef struct player {
     itemInventaire* inventaire; //maximum 20 items
 
 } player;
-
-
 
 
 // fonction qui permet de créer une ressource
@@ -284,8 +282,8 @@ void displayInventory(itemInventaire *inventory) {
 
 
 int main() {
-    enum ObjectMap BoisZ1 = BoisZ1;
-    ressourceInMap Sapin = makeObectMap(BoisZ1, "Sapin", 5, 1);
+    enum ObjectMap obm = BoisZ1;
+    ressourceInMap Sapin = makeObectMap(obm, "Sapin", 5, 1);
 
     player* p = malloc(sizeof (player));
 
