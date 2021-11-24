@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "src/inventory.c"
-#include "src/map.c"
+#include "src/header.h"
+//#include "src/inventory.c"
+//#include "src/map.c"
 #include "src/itemMap.c"
 
-typedef struct ressourceInMap ressourceInMap;
-int** getMap();
+
 // structure d'un item de l'inventaire
 typedef struct item {
     int idItem; //la valeur de l'objet Eppée en bois = 1 | pioche en bois = 2 ...
@@ -28,13 +28,21 @@ typedef struct itemInventaire {
     struct itemInventaire* next;
 } itemInventaire;
 
+typedef struct ressourceInMap {
+    char* nom;
+    int id;
+    int ressource;
+    int difficulte;
+} ressourceInMap;
+
 int checkIfPlayerCanCollect(itemInventaire* inventaire, ressourceInMap ressource) {
     itemInventaire* itemInventaire1 = inventaire;
     while (itemInventaire1->next != NULL) {
+        printf("%s\n", itemInventaire1->item.nom);
         if(itemInventaire1->item.typeOutils == ressource.ressource && itemInventaire1->item.materiaux >= ressource.difficulte) {
             return 1;
         }
-        inventaire = itemInventaire1->next;
+        itemInventaire1 = itemInventaire1->next;
     }
     return 0;
 }
@@ -90,8 +98,8 @@ void addPlayerOnTheMap(int** map, int* x, int* y){
 }
 
 //fonction qui permet de créer une map
-/*
-int** getMap() {
+
+/*int** getMap() {
     int** array = malloc(sizeof (int*) * 10);
     for (int i = 0; i < 10; ++i) {
         int* subArray = malloc(sizeof (int) * 10);
@@ -101,8 +109,8 @@ int** getMap() {
         array[i] = subArray;
     }
     return array;
-}
-*/
+}*/
+
 void displayMatrix(int **tab, int rows, int columns) {
     for(int i = 0; i < rows; i++) {
         for (int j = 0; j<columns;j++) {
@@ -164,22 +172,29 @@ void displayMapNearPlayer(int** map, int x, int y){
     }
 }
 
-
-
+void appendElement(itemInventaire* head, itemInventaire* last);
+itemInventaire makeItemInventaire(item item) ;
 
 
 //fonction qui fait passer un tour de jeu
 void newTour(int** array, char dir, int* y, int* x, itemInventaire* inventaire) {
     printf(" \n direction : %c", dir);
-    ressourceInMap a = makeObectMap(2, "RocherZ1", 6, 2);
+    ressourceInMap a = makeObectMap(2, "RocherZ1", 2, 1);
     if(dir == 'z') {
         if(*y - 1 > -1) {
             if(array[*y - 1][*x] != 0) {
                 int value = array[*y - 1][*x];
 
                 if(value >= 3 && value <=11) {
+
                     if (checkIfPlayerCanCollect(inventaire, a)) {
                         array[*y - 1][*x] = 0;
+                        item newItem;
+                        newItem.nom = "pierre";
+                        newItem.idItem = 6;
+                        newItem.nombre = 1;
+                        itemInventaire itemInventaire1 = makeItemInventaire(newItem);
+                        appendElement(inventaire, &itemInventaire1);
                     }
                 }
             }
@@ -294,7 +309,7 @@ void displayInventory(itemInventaire *inventory) {
 int main() {
 
     ressourceInMap* tabRessource = malloc(sizeof(ressourceInMap) * 15);
-    tabRessource[0] = makeObectMap(3, "PlanteZ1", 18, 1);
+    tabRessource[0] = makeObectMap(3, "PlanteZ1", 2, 1);
     enum ObjectMap obm = BoisZ1;
     ressourceInMap Sapin = makeObectMap(obm, "Sapin", 5, 1);
 

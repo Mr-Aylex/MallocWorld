@@ -4,14 +4,6 @@
 // Created by Alexandre on 04/11/2021.
 //
 
-struct ressourceInMap {
-    char* nom;
-    int id;
-    int ressource;
-    int difficulte;
-};
-
-
 int** getMap() {
     int** array = malloc(sizeof (int*) * 10);
     for (int i = 0; i < 10; ++i) {
