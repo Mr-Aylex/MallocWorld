@@ -21,6 +21,11 @@ typedef struct item {
 
 // structure ressource (plante, pierre, ...)  pouvant être placée sur la carte
 
+typedef struct ressourceGetInMap {
+    int idRessource;
+    char* nom;
+
+} ressourceGetInMap;
 
 typedef struct itemInventaire {
     //int id;
@@ -37,7 +42,7 @@ typedef struct ressourceInMap {
 
 int checkIfPlayerCanCollect(itemInventaire* inventaire, ressourceInMap ressource) {
     itemInventaire* itemInventaire1 = inventaire;
-    while (itemInventaire1->next != NULL) {
+    while (itemInventaire1 != NULL) {
         printf("%s\n", itemInventaire1->item.nom);
         if(itemInventaire1->item.typeOutils == ressource.ressource && itemInventaire1->item.materiaux >= ressource.difficulte) {
             return 1;
@@ -59,6 +64,14 @@ typedef struct player {
 } player;
 
 
+ressourceGetInMap makeRessourceGetInMap(int id, char* nom) {
+    ressourceGetInMap *ressource = malloc(sizeof(ressourceGetInMap));
+
+    ressource->idRessource = id;
+    ressource->nom = nom;
+    return *ressource;
+}
+
 // fonction qui permet de créer une ressource
 ressourceInMap makeObectMap(enum ObjectMap id, char* nom, int ressource, int difficulte) {
     ressourceInMap obj;
@@ -69,13 +82,13 @@ ressourceInMap makeObectMap(enum ObjectMap id, char* nom, int ressource, int dif
 }
 // fonction qui permet de créer un outil
 item makeOutils(enum ItemInventaire id, char* nom, int type, int durabilite, int materiaux) {
-    item out;
-    strcpy(out.nom, nom);
-    out.idItem = id;
-    out.type = type;
-    out.durabilite = durabilite;
-    out.materiaux = materiaux;
-    return out;
+    item* out = malloc(sizeof(item));
+    strcpy(out->nom, nom);
+    out->idItem = id;
+    out->type = type;
+    out->durabilite = durabilite;
+    out->materiaux = materiaux;
+    return *out;
 }
 
 
@@ -171,13 +184,81 @@ void displayMapNearPlayer(int** map, int x, int y){
         printf("En D le joueur est au bord \n");
     }
 }
+/* il faut pas oublié de faire une copie de la première valeur pour pouvoir reparcourire la liste */
 
-void appendElement(itemInventaire* head, itemInventaire* last);
-itemInventaire makeItemInventaire(item item) ;
+void appendElement(itemInventaire* head, itemInventaire* last) {
+//    printf("ajout de :");
+    while(head->next != NULL) {
+        //printf("%c", head->item.type);
+        head = head->next;
+    }
+    head->next = last;
+    printf("nom : %s \n", head->next->item.nom);
+}
+itemInventaire makeItemInventaire(item* item1) {
+    itemInventaire* inventaire = malloc(sizeof(itemInventaire));
+    inventaire->item = *item1;
+    inventaire->next = NULL;
+    return *inventaire;
+}
+
+void deleteItem(itemInventaire* inventaire, int id) {
+    itemInventaire* itemInventaire1 = inventaire;
+    while (inventaire->next != NULL) {
+        if(id == inventaire->item.idItem) {
+            itemInventaire1->next = inventaire->next;
+            free(inventaire);
+        }
+        itemInventaire1 = inventaire;
+        inventaire = inventaire->next;
+    }
+}
+void updateItemInInventory(itemInventaire* inventaire, int id, item* item1) {
+    while (inventaire != NULL) {
+        if(id == inventaire->item.idItem) {
+            inventaire->item = *item1;
+        }
+
+        inventaire = inventaire->next;
+    }
+}
+
+void displayInventory(itemInventaire *inventory) {
+    printf("<<----------------------->>\n");
+    printf("inventaire \n");
+    while (inventory != NULL) {
+        printf("%s \n",inventory->item.nom);
+        if (inventory->item.type == 'r') {
+            printf("quantite : %d \n", inventory->item.nombre);
+        }
+        else if(inventory->item.type == 'o') {
+            printf("materiaux : %d \n",inventory->item.materiaux);
+            printf("durabilite : %d \n",inventory->item.durabilite);
+        }
+        printf("\n");
+        inventory = inventory->next;
+
+    }
+    printf("<<----------------------->>\n");
+}
 
 
-//fonction qui fait passer un tour de jeu
-void newTour(int** array, char dir, int* y, int* x, itemInventaire* inventaire) {
+ressourceInMap getRessourceInMap(int value, ressourceInMap* arrayRessourceInMap) {
+    ressourceInMap ressource;
+    for(int i = 0 ; i<10 ; i++) {
+        if(arrayRessourceInMap[i].ressource == value) {
+            return arrayRessourceInMap[i];
+        }
+    }
+    return ressource;
+}
+
+
+/*
+ * fonction qui fait passer un tour de jeu
+*/
+
+void newTour(int** array, char dir, int* y, int* x, itemInventaire* inventaire,ressourceInMap* arrayRessourceInMap, ressourceGetInMap* arrayRessource) {
     printf(" \n direction : %c", dir);
     ressourceInMap a = makeObectMap(2, "RocherZ1", 2, 1);
     if(dir == 'z') {
@@ -186,15 +267,17 @@ void newTour(int** array, char dir, int* y, int* x, itemInventaire* inventaire) 
                 int value = array[*y - 1][*x];
 
                 if(value >= 3 && value <=11) {
-
                     if (checkIfPlayerCanCollect(inventaire, a)) {
                         array[*y - 1][*x] = 0;
-                        item newItem;
-                        newItem.nom = "pierre";
-                        newItem.idItem = 6;
-                        newItem.nombre = 1;
-                        itemInventaire itemInventaire1 = makeItemInventaire(newItem);
-                        appendElement(inventaire, &itemInventaire1);
+                        item* newItem = malloc(sizeof (item));
+                        newItem->nom = "pierre";
+                        newItem->idItem = 6;
+                        newItem->nombre = 1;
+                        newItem->type = 'r';
+                        itemInventaire *itemInventaire1 = malloc(sizeof (itemInventaire));
+                        *itemInventaire1 = makeItemInventaire(newItem);
+
+                        appendElement(inventaire, itemInventaire1);
                     }
                 }
             }
@@ -249,67 +332,31 @@ void newTour(int** array, char dir, int* y, int* x, itemInventaire* inventaire) 
 }
 
 
-
-
-
-
-/* il faut pas oublié de faire une copie de la première valeur pour pouvoir reparcourire la liste */
-
-void appendElement(itemInventaire* head, itemInventaire* last) {
-//    printf("ajout de :");
-    while(head->next != NULL) {
-        //printf("%c", head->item.type);
-        head = head->next;
-    }
-    head->next = last;
-}
-itemInventaire makeItemInventaire(item item1) {
-    itemInventaire* inventaire = malloc(sizeof(itemInventaire));
-    inventaire->item = item1;
-    inventaire->next = NULL;
-    return *inventaire;
-}
-
-void deleteItem(itemInventaire* inventaire, int id) {
-    itemInventaire* itemInventaire1 = inventaire;
-    while (inventaire->next != NULL) {
-        if(id == inventaire->item.idItem) {
-            itemInventaire1->next = inventaire->next;
-            free(inventaire);
-        }
-        itemInventaire1 = inventaire;
-        inventaire = inventaire->next;
-    }
-}
-void updateItemInInventory(itemInventaire* inventaire, int id, item* item1) {
-    while (inventaire != NULL) {
-        if(id == inventaire->item.idItem) {
-            inventaire->item = *item1;
-        }
-
-        inventaire = inventaire->next;
-    }
-}
-void displayInventory(itemInventaire *inventory) {
-    printf("<<-------------->>\n");
-    printf("inventaire \n");
-    while (inventory->next != NULL) {
-        printf("%s",inventory->item.nom);
-        printf(" ; durabilite : %d", inventory->item.durabilite);
-        printf("\n");
-
-        //printf("type: %c \n", inventory->item.type);
-        //printf("id: %d \n", inventory->item.idItem);
-        inventory = inventory->next;
-    }
-    printf("<<-------------->>\n");
-}
-
-
 int main() {
 
-    ressourceInMap* tabRessource = malloc(sizeof(ressourceInMap) * 15);
-    tabRessource[0] = makeObectMap(3, "PlanteZ1", 2, 1);
+    ressourceInMap* tabRessource = malloc(sizeof(ressourceInMap) * 9);
+    tabRessource[0] = makeObectMap(3, "PlanteZ1", 7, 1);
+    tabRessource[1] = makeObectMap(4, "RocherZ1", 6, 1);
+    tabRessource[2] = makeObectMap(5, "BoisZ1", 5, 1);
+    tabRessource[3] = makeObectMap(6, "PlanteZ2", 18, 2);
+    tabRessource[4] = makeObectMap(7, "RocherZ2", 17, 2);
+    tabRessource[5] = makeObectMap(8, "BoisZ2", 16, 2);
+    tabRessource[6] = makeObectMap(9, "PlanteZ3", 29, 3);
+    tabRessource[7] = makeObectMap(10, "RocherZ3", 28, 3);
+    tabRessource[8] = makeObectMap(11, "BoisZ3", 27, 3);
+
+    ressourceGetInMap* tabRessourceGetInMap = malloc(sizeof(ressourceGetInMap) * 9);
+    tabRessourceGetInMap[0] = makeRessourceGetInMap(7,"herbe");
+    tabRessourceGetInMap[1] = makeRessourceGetInMap(6,"pierre");
+    tabRessourceGetInMap[2] = makeRessourceGetInMap(5,"sapin");
+    tabRessourceGetInMap[3] = makeRessourceGetInMap(18,"lavande");
+    tabRessourceGetInMap[4] = makeRessourceGetInMap(17,"fer");
+    tabRessourceGetInMap[5] = makeRessourceGetInMap(16,"hetre");
+    tabRessourceGetInMap[6] = makeRessourceGetInMap(29,"chanvre");
+    tabRessourceGetInMap[7] = makeRessourceGetInMap(28,"diament");
+    tabRessourceGetInMap[8] = makeRessourceGetInMap(27,"chene");
+
+
     enum ObjectMap obm = BoisZ1;
     ressourceInMap Sapin = makeObectMap(obm, "Sapin", 5, 1);
 
@@ -326,15 +373,13 @@ int main() {
     testItem->nombre = 1;
     testItem->type = 'o';
     testItem->materiaux = 1;
-    itemInventaire inventaire2 = makeItemInventaire(*testItem);
-
-    itemInventaire inventaire = makeItemInventaire(*testItem);
+    itemInventaire inventaire = makeItemInventaire(testItem);
 
     //printf("%c",inventaire2->item.type);
     //newItem(); //--> à tester après appendElement();
     p->inventaire = &inventaire;
 
-    appendElement(p->inventaire,&inventaire2);//--> Tester chaque pointeurs dans la fonction appendElement();
+//    appendElement(p->inventaire,&inventaire);//--> Tester chaque pointeurs dans la fonction appendElement();
 
 
     /*
@@ -359,7 +404,7 @@ int main() {
             }
             printf("location: y: %d x: %d", (p->y), (p->x));
             itemInventaire *inventaireCopy = p->inventaire;// étape nécessaire, il faut faire une copie du pointeur pour que lors de l'affichage,
-            newTour(array, c, &(p->y), &(p->x), inventaireCopy);
+            newTour(array, c, &(p->y), &(p->x), inventaireCopy, tabRessource, tabRessourceGetInMap);
             printf("----------------------------------\n");
             displayMatrix(array, 10, 10);
             if(c == 'e') {
