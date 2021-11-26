@@ -7,4 +7,6 @@ add_executable(MallocWorld
         src/inventory.c
         src/itemMap.c
         src/map.c
-        main.c)
+        src/game.c
+        main.c
+        )

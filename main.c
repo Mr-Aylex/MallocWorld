@@ -1,12 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "src/header.h"
+//#include "src/header.h"
 #include "src/itemMap.c"
 
+typedef struct ressourceInMap ressourceInMap;
 
-// structure d'un item de l'inventaire
-typedef struct item {
+typedef struct itemInventaire itemInventaire;
+
+typedef struct item item;
+
+typedef struct ressourceGetInMap ressourceGetInMap;
+
+typedef struct player player;
+
+struct item {
     int idItem; //la valeur de l'objet Eppée en bois = 1 | pioche en bois = 2 ...
     char* nom; // Epee, pioche , ...
     char type; //il faut choisir arbitrairement une valeur pour chaque type a = Arme , o = Outil, r = Ressource, s = Soin
@@ -15,43 +23,31 @@ typedef struct item {
 
     int typeOutils; //1 = epee, 2 = pioche, 3 = hache, 4 Serpe
     int materiaux; //enum bois = 1, pierre = 2, fer = 3, diamant = 4  ...
-} item;
+} ;
 
 // structure ressource (plante, pierre, ...)  pouvant être placée sur la carte
 
 
-typedef struct itemInventaire {
+struct itemInventaire {
     //int id;
     item item;
     struct itemInventaire* next;
-} itemInventaire;
+};
 
-typedef struct ressourceInMap {
+struct ressourceInMap {
     char* nom;
     int id;
     int ressource;
     int difficulte;
-} ressourceInMap;
+} ;
 
-typedef struct ressourceGetInMap {
+struct ressourceGetInMap {
+    int idOutil;
     int idRessource;
     char* nom;
-} ressourceGetInMap;
+} ;
 
-//int checkIfPlayerCanCollect(itemInventaire* inventaire, ressourceInMap ressource) {
-//    itemInventaire* itemInventaire1 = inventaire;
-//    while (itemInventaire1->next != NULL) {
-//        printf("%s\n", itemInventaire1->item.nom);
-//        if(itemInventaire1->item.typeOutils == ressource.ressource && itemInventaire1->item.materiaux >= ressource.difficulte) {
-//            return 1;
-//        }
-//        itemInventaire1 = itemInventaire1->next;
-//    }
-//    return 0;
-//}
-
-
-typedef struct player {
+struct player {
     /* localisation sur la map */
     int y;
     int x;
@@ -59,48 +55,7 @@ typedef struct player {
     int map; // id de la map ou le joueur est present
     itemInventaire* inventaire; //maximum 20 items
 
-} player;
-
-
-// fonction qui permet de créer une ressource
-//ressourceInMap makeObectMap(enum ObjectMap id, char* nom, int ressource, int difficulte) {
-//    ressourceInMap obj;
-//    obj.id = id;
-//    obj.ressource = ressource;
-//    obj.difficulte = difficulte;
-//    return obj;
-//}
-// fonction qui permet de créer un outil
-//item makeOutils(enum ItemInventaire id, char* nom, int type, int durabilite, int materiaux) {
-//    item* out = malloc(sizeof(item));
-//    strcpy(out->nom, nom);
-//    out->idItem = id;
-//    out->type = type;
-//    out->durabilite = durabilite;
-//    out->materiaux = materiaux;
-//    return *out;
-//}
-
-
-//fonction qui ajoute un item dans la map à une position aléatoire
-//void putObjectToMap(int object, int** map){
-//    int x,y;
-//    do {
-//        x = rand()%(9);
-//        y = rand()%(9);
-//    } while(map[x][y] != 0);
-//    map[x][y] = object;
-
-//}
-//void addPlayerOnTheMap(int** map, int* x, int* y){
-//    do {
-//        *x = rand()%(9);
-//        *y = rand()%(9);
-//    } while(map[*x][*y] != 0);
-//    map[*x][*y] = 1;
-//}
-
-//fonction qui permet de créer une map
+} ;
 
 int** getMap() {
     int** array = malloc(sizeof (int*) * 10);
@@ -112,6 +67,22 @@ int** getMap() {
         array[i] = subArray;
     }
     return array;
+}
+
+void appendElement(itemInventaire* head, itemInventaire* last) {
+//    printf("ajout de :");
+    while(head->next != NULL) {
+        //printf("%c", head->item.type);
+        head = head->next;
+    }
+    head->next = last;
+    printf("nom : %s \n", head->next->item.nom);
+}
+itemInventaire makeItemInventaire(item* item1) {
+    itemInventaire* inventaire = malloc(sizeof(itemInventaire));
+    inventaire->item = *item1;
+    inventaire->next = NULL;
+    return *inventaire;
 }
 
 void deleteItem(itemInventaire* inventaire, int id) {
@@ -134,7 +105,223 @@ void updateItemInInventory(itemInventaire* inventaire, int id, item* item1) {
         inventaire = inventaire->next;
     }
 }
+void displayInventory(itemInventaire* inventory) {
+    printf("<<----------------------->>\n");
+    printf("inventaire \n");
+    while (inventory != NULL) {
+        printf("%s \n",inventory->item.nom);
+        if (inventory->item.type == 'r') {
+            printf("quantite : %d \n", inventory->item.nombre);
+        }
+        else if(inventory->item.type == 'o') {
+            printf("materiaux : %d \n",inventory->item.materiaux);
+            printf("durabilite : %d \n",inventory->item.durabilite);
+        }
+        printf("\n");
+        inventory = inventory->next;
 
+    }
+    printf("<<----------------------->>\n");
+}
+
+int checkIfPlayerCanCollect(itemInventaire* inventaire, ressourceInMap* ressource) {
+    itemInventaire* itemInventaire1 = inventaire;
+//    printf("nom ressource: %s, id : %d, difficulte : %d \n", ressource->ressource, ressource->id, ressource->difficulte);
+    while (itemInventaire1 != NULL) {
+        printf(" type outile : %d , %d \n", itemInventaire1->item.typeOutils,ressource->ressource );
+        if(itemInventaire1->item.typeOutils == 2 && itemInventaire1->item.materiaux >= ressource->difficulte) {
+            return 1;
+        }
+        itemInventaire1 = itemInventaire1->next;
+    }
+    return 0;
+}
+
+
+item makeOutils(int id, char* nom, int type, int durabilite, int materiaux) {
+    item* out = malloc(sizeof(item));
+    strcpy(out->nom, nom);
+    out->idItem = id;
+    out->type = type;
+    out->durabilite = durabilite;
+    out->materiaux = materiaux;
+    return *out;
+}
+
+void newTour(int** array, char dir, int* y, int* x, itemInventaire* inventaire, ressourceInMap* arrayRessourceInMap, ressourceGetInMap* arrayRessource) {
+    printf(" \n direction : %c \n", dir);
+    if(dir == 'z') {
+        if(*y - 1 > -1) {
+            if(array[*y - 1][*x] != 0) {
+                int value = array[*y - 1][*x];
+                ressourceInMap* ressource = malloc(sizeof(ressourceInMap));
+                for (int i = 0; i<9; i++) {
+                    if(value == arrayRessourceInMap[i].id) {
+                        ressource = &(arrayRessourceInMap[i]);
+                        break;
+                    }
+                }
+
+
+                if(value >= 3 && value <=11) {
+                    if (checkIfPlayerCanCollect(inventaire, ressource)) {
+                        printf("ressource disponible: %d\n", ressource->id);
+                        array[*y - 1][*x] = 0;
+                        item* newItem = malloc(sizeof (item));
+                        newItem->nom = "pierre";
+                        newItem->idItem = 6;
+                        newItem->nombre = 1;
+                        newItem->type = 'r';
+                        itemInventaire *itemInventaire1 = malloc(sizeof (itemInventaire));
+                        *itemInventaire1 = makeItemInventaire(newItem);
+
+                        appendElement(inventaire, itemInventaire1);
+                    }
+                }
+            }
+            else {
+                array[*y][*x] = 0;
+                array[*y - 1][*x] = 1;
+                *y -= 1;
+            }
+
+        }
+    }
+    else if(dir == 'q') {
+        if(*x - 1 > -1) {
+            if(array[*y][*x - 1] != 0) {
+                int value = array[*y][*x - 1];
+                if(value >= 3 && value <=11) {
+
+                }
+            }
+            array[*y][*x] = 0;
+            array[*y][*x - 1] = 1;
+            *x -= 1;
+        }
+    }
+    else if(dir == 's') {
+        if(*y + 1 < 10) {
+            if(array[*y + 1][*x] != 0) {
+                int value = array[*y + 1][*x];
+                if(value >= 3 && value <=11) {
+
+                }
+            }
+            array[*y][*x] = 0;
+            array[*y + 1][*x] = 1;
+            *y += 1;
+        }
+    }
+    else if(dir == 'd') {
+        if(*x+1 < 10) {
+            if(array[*y][*x + 1] != 0) {
+                int value = array[*y][*x + 1];
+                if(value >= 3 && value <=11) {
+
+                }
+            }
+            array[*y][*x] = 0;
+            array[*y][*x + 1] = 1;
+
+            *x += 1;
+        }
+    }
+}
+ressourceGetInMap makeRessourceGetInMap(int id, char* nom) {
+    ressourceGetInMap* ressourceGetInMap1 = malloc(sizeof(ressourceGetInMap));
+    ressourceGetInMap1->idRessource = id;
+    ressourceGetInMap1->nom = nom;
+    return *ressourceGetInMap1;
+}
+ressourceInMap makeObectMap(int id, char nom[20], int ressource, int difficulte) {
+    ressourceInMap* ressourceInMap1 = malloc(sizeof(ressourceInMap));
+    ressourceInMap1->id = id;
+    ressourceInMap1->nom = nom;
+    ressourceInMap1->ressource = ressource;
+    ressourceInMap1->difficulte = difficulte;
+    return *ressourceInMap1;
+}
+// structure d'un item de l'inventaire
+
+
+
+void putObjectToMap(int object, int** map){
+    int x,y;
+    do {
+        x = rand()%(9);
+        y = rand()%(9);
+    } while(map[x][y] != 0);
+    map[x][y] = object;
+
+}
+
+void addPlayerOnTheMap(int** map, int* x, int* y){
+    do {
+        *x = rand()%(9);
+        *y = rand()%(9);
+    } while(map[*x][*y] != 0);
+    map[*x][*y] = 1;
+}
+
+void displayMatrix(int **tab, int rows, int columns) {
+    for(int i = 0; i < rows; i++) {
+        for (int j = 0; j<columns;j++) {
+            printf("%d  ", tab[i][j]);
+        }
+        printf("\n");
+
+
+    }
+}
+
+
+void displayMapNearPlayer(int** map, int x, int y){
+    if(y - 1 > -1) {
+        int ZObject = map[y -1][x];
+        enum ObjectMap itZ = ZObject;
+        if (itZ >= -3 && itZ <= 99) {
+            printf("En Z se trouve : %d \n", itZ);
+        }
+    }
+    else {
+        printf("En Z le joueur est au bord \n");
+    }
+
+    if(x - 1 > -1) {
+        int QObject = map[y][x - 1];
+        enum ObjectMap itQ = QObject;
+        if (itQ >= -3 && itQ <= 99){
+            printf("En Q se trouve : %d \n", itQ);
+        }
+    }
+    else{
+        printf("En Q le joueur est au bord \n");
+    }
+
+    if(y + 1 < 10) {
+        int SObject = map[y + 1][x];
+        enum ObjectMap itS = SObject;
+        if (itS >= -3 && itS <= 99){
+            printf("En S se trouve : %d \n", itS);
+        }
+    }
+    else{
+        printf("En S le joueur est au bord \n");
+    }
+
+
+    if(x+1 < 10) {
+        int DObject = map[y][x + 1];
+        enum ObjectMap itD = DObject;
+        if (itD >= -3 && itD <= 99){
+            printf("En D se trouve : %d \n", itD);
+        }
+    }
+    else{
+        printf("En D le joueur est au bord \n");
+    }
+}
 
 
 int main() {
