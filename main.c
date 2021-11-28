@@ -58,14 +58,14 @@ struct player {
 
 };
 //printf("Vous n'avez pas de materiaux\n");
-checkPNJ(int x, int y, int map, player* joueur) {
+void checkPNJ(player* joueur, item* tabOutils) {
     printf("Bonjour je suis le commercant\n");
     printf("J'ai réparé vos outils\n");
     printf("Je peux vous fabriquer des outils\n");
-    char reponse = "";
+    char reponse;
     do {
         printf("Voulez vous fabriquer un outil ? (o/n)\n");
-        scanf("%s", &reponse);
+        scanf(" %c", &reponse);
     } while (reponse != 'o' && reponse != 'n');
     //outil
     if (reponse == 'o') {
@@ -80,40 +80,41 @@ checkPNJ(int x, int y, int map, player* joueur) {
         printf("Hache en bois --> 3 sapin\n");
         printf("Hache en pierre --> 2 sapin + 3 pierres\n");
         printf("Hache en fer --> 2 hetre + 4 minerais de fer\n");
-
+//1 = epee, 2 = pioche, 3 = hache, 4 Serpe, 5 marteau, 6 armure, 7 lance
+//bois = 1, pierre = 2, fer = 3, diamant = 4
         printf("Quel outil voulez vous fabriquer ?\n");
-        printf("1 = serpe\n");
         printf("2 = pioche\n");
         printf("3 = hache\n");
-        int typeOutil = 0;
+        printf("4 = serpe\n");
+
+        int typeOutil = 8;
         do {
             scanf("%d", &typeOutil);
-        } while (typeOutil <= 1 || typeOutil >= 3);
+        } while (typeOutil != 1 && typeOutil != 2 && typeOutil != 3);
         printf("Quel materiaux voulez vous utiliser ?\n");
         printf("1 = bois\n");
         printf("2 = pierre\n");
         printf("3 = fer\n");
-        int materiaux = 0;
+        int materiaux = 8;
         do {
             scanf("%d", &materiaux);
-        } while (materiaux < 1 || materiaux > 3);
+        } while (materiaux != 1 && materiaux != 3 && materiaux != 2);
+        item outils;
+        for (int i = 0; i <25 ; i++) {
+            if (tabOutils[i].typeOutils == typeOutil && tabOutils[i].materiaux == materiaux) {
+                outils = tabOutils[i];
+            }
+        }
+        printf("Vous avez fabriqué %d\n", outils.idItem);
+        printf("Vous avez fabriqué %s\n", outils.nom);
         printf("Vous avez fabriquer un outil de type %d et de matériaux %d\n", typeOutil, materiaux);
-//        testItem->idItem = 2;
-//        testItem->nom = "Pioche en Bois";
-//        testItem->typeOutils = 2;
-//        testItem->durabilite = 5;
-//        testItem->nombre = 1;
-//        testItem->type = 'o';
-//        testItem->materiaux = 1;
-        item item = {
-            typeOutils: typeOutil,
-            materiaux: materiaux
-        };
         itemInventaire* newItem = malloc(sizeof(itemInventaire));
-        newItem->item = item;
+        newItem->item = outils;
         itemInventaire* inventaire = joueur->inventaire;
         while (inventaire != NULL) {
-
+            if(outils.typeOutils == inventaire->item.typeOutils) {
+                inventaire->item = outils;
+            }
             inventaire = inventaire->next;
         }
     }
@@ -246,7 +247,7 @@ int checkIfPlayerCanCollect(itemInventaire* inventaire, ressourceInMap* ressourc
 
 item makeOutils(int id, char* nom, int type, int durabilite, int materiaux) {
     item* out = malloc(sizeof(item));
-    strcpy(out->nom, nom);
+    out->nom = nom;
     out->idItem = id;
     out->type = type;
     out->durabilite = durabilite;
@@ -254,8 +255,10 @@ item makeOutils(int id, char* nom, int type, int durabilite, int materiaux) {
     return *out;
 }
 
-void newTour(int** array, char dir, int* y, int* x, itemInventaire* inventaire, ressourceInMap* arrayRessourceInMap, ressourceGetInMap* arrayRessource) {
+void newTour(int** array, char dir, int* y, int* x, player* p, ressourceInMap* arrayRessourceInMap, ressourceGetInMap* arrayRessource, item* tabOutils) {
     printf(" \n direction : %c \n", dir);
+    itemInventaire* inventaire = p->inventaire;
+
     if(dir == 'z') {
         if(*y - 1 > -1) {
             if(array[*y - 1][*x] != 0) {
@@ -287,6 +290,9 @@ void newTour(int** array, char dir, int* y, int* x, itemInventaire* inventaire, 
 
                         appendElement(inventaire, itemInventaire1);
                     }
+                }
+                else if(value == 2) {
+                    checkPNJ(p, tabOutils);
                 }
             }
             else {
@@ -445,7 +451,6 @@ void putObjectToMap(int object, int** map){
         y = rand()%(9);
     } while(map[x][y] != 0);
     map[x][y] = object;
-
 }
 
 void addPlayerOnTheMap(int** map, int* x, int* y){
@@ -458,16 +463,34 @@ void addPlayerOnTheMap(int** map, int* x, int* y){
 }
 
 void displayMatrix(int **tab, int rows, int columns) {
+    FILE * fptr;
+    fptr = fopen ("savemap.txt", "w");
     for(int i = 0; i < rows; i++) {
         for (int j = 0; j<columns;j++) {
+            fprintf(fptr, "%d", tab[i][j]);
             printf("%d  ", tab[i][j]);
         }
         printf("\n");
-
-
+    }
+    fclose(fptr);
+}
+void displayMap1(){
+    FILE *fptr;
+    char buffer[50], c;
+    fptr = fopen("savemap.txt", "r");
+    printf(buffer, 50, fptr);
+}
+void putPortalToMap(int zone, int **array) {
+    //add portal on map
+    switch (zone) {
+        case 1:
+            putObjectToMap(-2, array);
+            break;
+        case 2:
+            putObjectToMap(-3, array);
+            break;
     }
 }
-
 
 void displayMapNearPlayer(int** map, int x, int y){
     if(y - 1 > -1) {
@@ -541,10 +564,35 @@ int main() {
     tabRessourceGetInMap[7] = makeRessourceGetInMap(28,"diament");
     tabRessourceGetInMap[8] = makeRessourceGetInMap(27,"chene");
 //    makeOutils(int id, char* nom, int type, int durabilite, int materiaux
-    //1 = epee, 2 = pioche, 3 = hache, 4 Serpe, 5 marteau, 6 armure, 7 lance
-    item *tabOutils = malloc(sizeof(item) * 9);
-    tabOutils[0] = makeOutils(1, "epee", 1, 10, );
-    tabOutils[1] = makeOutils(2, "pioche", 1, 1);
+    //1 = epee, 2 = pioche, 3 = Serpe, 4 hache, 5 marteau, 6 armure, 7 lance
+//    bois = 1, pierre = 2, fer = 3, diamant = 4  ...
+    item *tabOutils = malloc(sizeof(item) * 22);
+    tabOutils[0] = makeOutils(1, "epee en bois", 1, 10, 1);
+    tabOutils[1] = makeOutils(2, "pioche en bois", 2, 10, 1);
+    tabOutils[2] = makeOutils(4, "hache en bois", 3, 10, 1);
+    tabOutils[3] = makeOutils(3, "serpe en bois", 4, 10, 1);
+
+    tabOutils[4] = makeOutils(10, "marteau en pierre", 5, 20, 2);
+    tabOutils[5] = makeOutils(11, "plastron en pierre", 6, 20, 2);
+    tabOutils[6] = makeOutils(9, "lance en pierre", 7, 20, 2);
+    tabOutils[7] = makeOutils(8, "epee en pierre", 1, 20, 2);
+    tabOutils[8] = makeOutils(12, "pioche en pierre", 2, 20, 2);
+    tabOutils[9] = makeOutils(14, "hache en pierre", 3, 20, 2);
+    tabOutils[10] = makeOutils(13, "serpe en pierre", 4, 20, 2);
+
+    tabOutils[11] = makeOutils(21, "marteau en fer", 5, 30, 3);
+    tabOutils[12] = makeOutils(22, "plastron en fer", 6, 30, 3);
+    tabOutils[13] = makeOutils(20, "lance en fer", 7, 30, 3);
+    tabOutils[14] = makeOutils(19, "epee en fer", 1, 30, 3);
+    tabOutils[15] = makeOutils(23, "pioche en fer", 2, 30, 3);
+    tabOutils[16] = makeOutils(25, "hache en fer", 3, 30, 3);
+    tabOutils[17] = makeOutils(24, "serpe en fer", 4, 30, 3);
+
+    tabOutils[18] = makeOutils(33, "marteau en diamant", 5, 40, 4);
+    tabOutils[19] = makeOutils(32, "armure en diamant", 6, 40, 4);
+    tabOutils[20] = makeOutils(31, "lance en diamant", 7, 40, 4);
+    tabOutils[21] = makeOutils(30, "epee en diamant", 1, 40, 4);
+
 
     enum ObjectMap obm = BoisZ1;
     //ressourceInMap Sapin = makeObectMap(obm, "Sapin", 5, 1);
@@ -585,17 +633,19 @@ int main() {
 
     displayMatrix(array, 10,10);
     char c = 'e';
+    displayMapNearPlayer(array, p->x, p->y);
     while (c != 'a') {
-        displayMapNearPlayer(array, p->x, p->y);
+
         printf("\n Commande: ");
         int res = scanf("%c", &c);
         if(res == 1) {
+
             if(c == 'e') {
                 displayInventory(p->inventaire);
             }
             printf("position: y: %d x: %d", (p->y), (p->x));
             itemInventaire *inventaireCopy = p->inventaire;// étape nécessaire, il faut faire une copie du pointeur pour que lors de l'affichage,
-            newTour(array, c, &(p->y), &(p->x), inventaireCopy, tabRessource, tabRessourceGetInMap);
+            newTour(array, c, &(p->y), &(p->x), p, tabRessource, tabRessourceGetInMap,tabOutils);
             printf("----------------------------------\n");
             displayMatrix(array, 10, 10);
             if(c == 'e') {
